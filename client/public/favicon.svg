@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2563eb"/> <!-- Tailwind blue-600 -->
+      <stop offset="100%" stop-color="#14b8a6"/> <!-- Tailwind teal-500 -->
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.4)" />
+    </filter>
+  </defs>
+
+  <!-- Circle background with gradient and shadow -->
+  <circle cx="24" cy="24" r="22" fill="url(#grad)" filter="url(#shadow)" />
+
+  <!-- The white polyline icon (scaled to fit nicely inside the circle) -->
+  <polyline 
+    points="10 24 16 24 20 14 28 34 32 24 38 24"
+    fill="none"
+    stroke="white"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
