@@ -1,4 +1,4 @@
-
+// server/src/middlewares/auth.js
 const { verifyAccess } = require("../utils/tokens");
 
 function requireAuth(req, res, next) {

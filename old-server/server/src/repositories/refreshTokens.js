@@ -1,3 +1,4 @@
+// server/src/repositories/refreshTokens.js
 const { pool } = require("../db");
 
 // Ruaj një refresh token (hash + expiry)
@@ -30,4 +31,8 @@ async function revokeAllForUser(userId) {
 }
 
 module.exports = {
-  insertRefreshToken,}
+  insertRefreshToken,
+  findActiveByUser,
+  revokeById,
+  revokeAllForUser,
+};
