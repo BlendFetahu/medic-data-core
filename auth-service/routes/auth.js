@@ -1,9 +1,9 @@
 const { signAccess, signRefresh, verifyRefresh, hashToken, compareHash } = require("../utils/tokens");
-const { insertRefreshToken, findActiveByUser, revokeById } = require("../repositories/refreshTokens");
+const { insertRefreshToken, findActiveByUser, revokeById } = require("../../old-server/server/src/repositories/refreshTokens");
 
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const { pool } = require("../db");
+const { pool } = require("../src/db");
 
 const router = express.Router();
 
