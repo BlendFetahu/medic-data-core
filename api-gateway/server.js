@@ -6,6 +6,7 @@ import axios from "axios";
 
 dotenv.config();
 const app = express();
+import jwt from "jsonwebtoken";
 
 app.use(express.json());
 app.use(cors());
@@ -48,8 +49,83 @@ app.use("/api", (req, res) => {
         });
 });
 
+app.use(
+  "/api/doctors",
+  verifyJWT,
+  allowRoles("ADMIN"),
+  (req, res) => {
+    axios({
+      method: req.method,
+      url: `${HOSPITAL_SERVICE_URL}${req.originalUrl}`,
+      data: req.body,
+      headers: req.headers,
+    })
+      .then(r => res.status(r.status).json(r.data))
+      .catch(e => res.status(e.response?.status || 500).json(e.response?.data));
+  }
+);
+
+
+app.use(
+  "/api/patients",
+  verifyJWT,
+  allowRoles("ADMIN", "DOCTOR"),
+  (req, res) => {
+    axios({
+      method: req.method,
+      url: `${HOSPITAL_SERVICE_URL}${req.originalUrl}`,
+      data: req.body,
+      headers: req.headers,
+    })
+      .then(r => res.status(r.status).json(r.data))
+      .catch(e => res.status(e.response?.status || 500).json(e.response?.data));
+  }
+);
+
+app.use(
+  "/api/appointments",
+  verifyJWT,
+  allowRoles("ADMIN", "DOCTOR", "PATIENT"),
+  (req, res) => {
+    axios({
+      method: req.method,
+      url: `${HOSPITAL_SERVICE_URL}${req.originalUrl}`,
+      data: req.body,
+      headers: req.headers,
+    })
+      .then(r => res.status(r.status).json(r.data))
+      .catch(e => res.status(e.response?.status || 500).json(e.response?.data));
+  }
+);
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
     console.log(`API Gateway running on port ${PORT}`);
 });
+
+const verifyJWT = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // { id, role }
+    next();
+  } catch (err) {
+    return res.status(403).json({ message: "Invalid token" });
+  }
+};
+
+const allowRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    next();
+  };
+};
