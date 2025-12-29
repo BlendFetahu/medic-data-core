@@ -16,19 +16,21 @@ export default function AdminDashboard() {
 
   // Kontrolli i Autentikimit
   useEffect(() => {
-    const user = getUser();
+    // 1. Marrim të dhënat e përdoruesit direkt nga funksioni getUser()
+    const user = getUser(); 
     const hasAT = !!getAccessToken();
     const role = (user?.role || "").toUpperCase();
 
     console.log("🛠 Dashboard Debug:", { hasAT, role, user });
 
+    // 2. Kontrollojmë aksesin pa bërë thirrje në API
     if (!hasAT || role !== "ADMIN") {
-      console.error("❌ Nuk ka akses ose nuk është Admin. Duke u kthyer te login...");
+      console.error("❌ Nuk ka akses Admin. Kthimi te login...");
       navigate("/login", { replace: true });
       return;
     }
 
-    // Në vend që të bëjmë thirrje në API që dështon, marrim të dhënat nga auth.js
+    // 3. Vendosim të dhënat e profilit direkt nga token-i
     setMe(user);
     setChecking(false);
   }, [navigate]);

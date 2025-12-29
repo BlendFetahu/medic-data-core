@@ -96,43 +96,51 @@ export default function PatientDashboard() {
     const role = (getUser()?.role || "").toUpperCase();
      if (!hasAT || role !== "PATIENT") {
       navigate("/login", { replace: true });
+      return;
      }
     }, [navigate]);
 
 
   // initial load
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
+useEffect(() => {
+  (async () => {
+    try {
+      setLoading(true);
 
-        // who am I?
-        const { data: meRes } = await api.get("/me");
-        setMe(meRes.user);
+      const userData = getUser();
+      setMe(userData);
 
-        // prefill email from /patients/me or /me
-        try {
-          const { data: prof } = await api.get("/patients/me");
-          setEmail(prof?.email || meRes?.user?.email || "");
-        } catch {
-          setEmail(meRes?.user?.email || "");
-        }
+      // 2. Prefill email from the token data
+      const userEmail = userData?.email || "";
+      setEmail(userEmail);
 
-        // doctors list (public search)
-        const { data: docsRes } = await api.get("/doctors/search");
+      // 3. Load data from Hospital Service (Port 5002)
+      const results = await Promise.allSettled([
+        api.get("/doctors/search"),
+        api.get("/patients/me/appointments")
+      ]);
+
+      // Load Doctors
+      if (results[0].status === "fulfilled") {
+        const docsRes = results[0].value.data;
         setDoctors(Array.isArray(docsRes?.items) ? docsRes.items : []);
-
-        // my appointments
-        const { data: appts } = await api.get("/patients/me/appointments");
-        setAppointments(Array.isArray(appts) ? appts : []);
-        setErr("");
-      } catch (e) {
-        setErr(e?.response?.data?.message || "Invalid token");
-      } finally {
-        setLoading(false);
       }
-    })();
-  }, []);
+
+      // Load Appointments
+      if (results[1].status === "fulfilled") {
+        const appts = results[1].value.data;
+        setAppointments(Array.isArray(appts) ? appts : []);
+      }
+
+      setErr("");
+    } catch (e) {
+      console.error("Dashboard load error:", e);
+      setErr(e?.response?.data?.message || "Failed to sync data.");
+    } finally {
+      setLoading(false);
+    }
+  })();
+}, [navigate]);
 
   // refresh booked slots when doctor/date changes (skip weekends)
   useEffect(() => {

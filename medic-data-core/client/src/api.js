@@ -74,52 +74,60 @@ export default api;
 
 // --- FUNKSIONET E EKSPORTUARA ME PORTAT E SAKTA ---
 
-/** * LOGIN - Kjo shkon specifishte te PORTA 5001
- */
+// client/src/api.js
+
+/** ✅ LOGIN - Duhet të shkojë te PORTA 5001 */
 export async function loginUser(email, password) {
+  // Kjo rregullon gabimin 404 që shihni te Login.jsx:17
   const { data } = await axios.post(`${AUTH_URL}/auth/login`, { email, password });
   return data;
 }
 
-/** * ADMIN ROUTES - Shkojnë te PORTA 5002
- */
-export async function getDoctors({ search = "" } = {}) {
-  const { data } = await api.get("/api/doctors", { params: { search } });
+/** ✅ LOGOUT - Duhet të shkojë te PORTA 5001 */
+export async function logoutUser() {
+  const refreshToken = localStorage.getItem("refreshToken");
+  const { data } = await axios.post(`${AUTH_URL}/auth/logout`, { refreshToken });
   return data;
 }
 
+/** ✅ ADMIN ROUTES - Shkojnë te PORTA 5002 */
+
+// Krijimi i doktorit (Backend-i yt e bën vetë llogarinë te users)
 export async function createDoctor(payload) {
-  const { data } = await api.post("/api/doctors", payload);
+  const formattedPayload = {
+    ...payload,
+    specialization: payload.specialty // Përshtatja: Frontend 'specialty' -> Backend 'specialization'
+  };
+  // Rruga e saktë pa /api
+  const { data } = await api.post("/doctors", formattedPayload);
   return data;
 }
 
-export function deleteDoctor(id) {
-  return api.delete(`/api/doctors/${id}`).then((r) => r.data);
+// Lista e doktorëve
+export async function getDoctors(params = {}) {
+  const { data } = await api.get("/doctors", { params });
+  return data;
 }
 
-export async function getPatients({ search = "" } = {}) {
-  const { data } = await api.get("/api/patients", { params: { search } });
+// Fshirja e doktorit
+export async function deleteDoctor(id) {
+  const { data } = await api.delete(`/doctors/${id}`); // Hequr /api
+  return data;
+}
+
+// Pacientët (Backend-i i 5002 i pret pa /api)
+export async function getPatients(params = {}) {
+  const { data } = await api.get("/patients", { params }); // Hequr /api
   return data;
 }
 
 export async function deletePatient(id) {
-  const { data } = await api.delete(`/api/patients/${id}`);
+  const { data } = await api.delete(`/patients/${id}`); // Hequr /api
   return data;
 }
 
-export async function getAdminStats() {
-  const { data } = await api.get("/api/admin/stats");
-  return data;
-}
-
-/** * DOCTOR ROUTES - Shkojnë te PORTA 5002
- */
+/** ✅ DOCTOR ROUTES - Shkojnë te PORTA 5002 */
 export async function getMyPatients() {
-  const { data } = await api.get("/api/doctors/me/patients");
-  return data?.items ?? data ?? [];
-}
-
-export async function getMyAppointments() {
-  const { data } = await api.get("/api/doctors/me/appointments");
+  const { data } = await api.get("/doctors/me/patients"); // Hequr /api
   return data?.items ?? data ?? [];
 }

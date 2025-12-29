@@ -22,10 +22,11 @@ router.post("/signup", async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
 
     // Ruajmë rolin gjithmonë me shkronja të mëdha
-    await pool.query(
-      "INSERT INTO users (email, password, role) VALUES (?, ?, 'PATIENT')",
-      [email, hash]
-    );
+
+  await pool.query(
+    "INSERT INTO users (email, password, role) VALUES (?, ?, ?)",
+    [email, hash, req.body.role || 'PATIENT'] 
+  );
 
     return res.status(201).json({ message: "User created" });
   } catch (err) {

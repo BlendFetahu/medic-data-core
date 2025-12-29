@@ -1,7 +1,7 @@
 // client/src/pages/Signup.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api";
+import axios from "axios";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -16,9 +16,13 @@ export default function SignupPage() {
     setErr(""); 
     setMsg("");
     try {
-      await api.post("/auth/signup", { email, password, name });
+      await axios.post("http://localhost:5001/auth/signup", { 
+        email, 
+        password, 
+        name 
+      });
       setMsg("Account created. You can login now.");
-      setTimeout(() => navigate("/login"), 800);
+      setTimeout(() => navigate("/login"), 1500);
     } catch (e) {
       setErr(e?.response?.data?.message || "Signup failed");
     }

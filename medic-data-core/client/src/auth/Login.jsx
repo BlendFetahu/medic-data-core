@@ -1,7 +1,7 @@
 // client/src/pages/Login.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api";
+import { loginUser } from "../api";
 import { setAuth } from "../auth";
 
 export default function LoginPage() {
@@ -14,7 +14,7 @@ export default function LoginPage() {
     e.preventDefault();
     setErr("");
     try {
-      const { data } = await api.post("/auth/login", { email, password });
+      const data = await loginUser(email, password);
       setAuth(data.accessToken, data.refreshToken, data.user);
       window.dispatchEvent(new Event("auth-changed"));
 

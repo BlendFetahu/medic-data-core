@@ -50,31 +50,35 @@ export default function DoctorDashboard() {
   }
 
   // ---- Guard + initial load ----
+ // ---- Guard + initial load ----
   useEffect(() => {
     async function run() {
-       const hasAT = !!getAccessToken();
-        const role = (getUser()?.role || "").toUpperCase();
-        if (!hasAT || role !== "DOCTOR") {
-          navigate("/login", { replace: true });
-          return;
-        }
+      const userData = getUser(); // Marrim të dhënat nga Local Storage
+      const hasAT = !!getAccessToken();
+      const role = (userData?.role || "").toUpperCase();
+
+      // Kontrolli i aksesit: Nëse nuk ka token ose nuk është DOCTOR, ktheje te login
+      if (!hasAT || role !== "DOCTOR") {
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      // NDRYSHIMI MINIMAL: Përdorim userData direkt
+      // Kjo shmang kërkesën api.get("/me") që kthente 404
+      setMe(userData);
 
       try {
-        // kush jam?
-        const meRes = await api.get("/me");
-        setMe(meRes.data.user || null);
-
-        // thirr rruget e mjekut
+        // Thirr rrugët e mjekut te porta 5002 (Hospital Service)
         const [pRes, aRes, dRes] = await Promise.all([
           api.get("/doctors/me/patients"),
           api.get("/doctors/me/appointments"),
           api.get("/doctors/me/diagnoses"),
         ]);
 
-        // patients
+        // patients: Ngarkojmë listën e pacientëve
         setPatients(Array.isArray(pRes.data) ? pRes.data : pRes.data?.items ?? []);
 
-        // appointments: normalizo emrat e datave në starts_at/ends_at
+        // appointments: Normalizojmë formatin e kohës për të dhënat e termineve
         const rawAppts = Array.isArray(aRes.data) ? aRes.data : aRes.data?.items ?? [];
         const appts = rawAppts.map(a => {
           const starts =
@@ -89,11 +93,13 @@ export default function DoctorDashboard() {
         });
         setAppointments(appts);
 
-        // diagnoses
+        // diagnoses: Ngarkojmë listën e diagnozave
         setDiagnoses(Array.isArray(dRes.data) ? dRes.data : dRes.data?.items ?? []);
       } catch (err) {
-        navigate("/login", { replace: true });
+        console.error("Gabim gjatë ngarkimit të të dhënave të doktorit:", err);
+        // Nuk bëjmë navigate("/login") këtu që të mos na bllokojë faqen nëse një rrugë dështon
       } finally {
+        // Ndalojmë gjendjen "Loading..."
         setChecking(false);
       }
     }

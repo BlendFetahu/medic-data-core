@@ -17,7 +17,7 @@ export default function ProtectedRoute({ allowed = [] }) {
   try {
     const payload = parseJwt(token);
     role = norm(payload?.role);
-    console.log("ProtectedRoute - Roli i gjetur në token:", role);
+    //console.log("ProtectedRoute - Roli i gjetur në token:", role);
   } catch (err) {
     console.error("Gabim në dekodimin e tokenit:", err);
     return <Navigate to="/login" replace />;
